@@ -7,7 +7,28 @@ public class TinyRenderer
 
   public static void main( String [] argv ) throws FileNotFoundException, IOException
   {
-    new TinyRenderer( 800, 800, "./head.obj" ).render();
+    if ( argv.length != 4 )
+    {
+      showHelp();
+    }
+    if ( argv.length > 0 && argv[ 0 ].equals( "-help" ) )
+    {
+      showHelp();
+    }
+    else if ( argv.length == 4 )
+    {
+      int width = Integer.parseInt( argv[0] );
+      int height = Integer.parseInt( argv[1] );
+      String model = argv[2];
+      String output = argv[3];
+
+      new TinyRenderer( width, height, model ).render( output );
+    }
+  }
+
+  private static void showHelp()
+  {
+    System.out.println( "Usage: TinyRenderer [width] [height] [model file] [output file]" );
   }
 
   private TGAImage tgaImage;
@@ -16,14 +37,15 @@ public class TinyRenderer
   private TinyRenderer( int width, int height, String model ) throws FileNotFoundException, IOException
   {
     this.tgaImage = new TGAImage( width, height, 0xFF000000 );
+
     this.model = new Model( model );
   }
 
-  private void render() throws FileNotFoundException, IOException
+  private void render( String output ) throws FileNotFoundException, IOException
   {
     this.model.render( this.tgaImage.getWidth(), this.tgaImage.getHeight(), this );
 
-    this.tgaImage.write( "./image.tga" );
+    this.tgaImage.write( output );
   }
 
   public void line( int x1, int y1, int x2, int y2, int colour )
