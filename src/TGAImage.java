@@ -34,6 +34,16 @@ public class TGAImage
     }
   }
 
+  public int get( int x, int y )
+  {
+    if ( x < this.width && y < this.height )
+    {
+      y = this.height - 1 - y;
+      return this.pixels[ x + ( y * width )];
+    }
+    return -1;
+  }
+
   public void write( String filename ) throws FileNotFoundException, IOException
   {
     byte [] output = TGAWriter.write( this.pixels, this.width, this.height, TGAReader.ARGB );
