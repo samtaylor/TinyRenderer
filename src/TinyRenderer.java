@@ -5,50 +5,47 @@ public class TinyRenderer
 {
   private static final boolean DEBUG = false;
 
-  public static void main( String [] argv ) throws FileNotFoundException, IOException
-  {
-    if ( argv.length != 4 )
-    {
-      showHelp();
-    }
-    if ( argv.length > 0 && argv[ 0 ].equals( "-help" ) )
-    {
-      showHelp();
-    }
-    else if ( argv.length == 4 )
-    {
-      int width = Integer.parseInt( argv[0] );
-      int height = Integer.parseInt( argv[1] );
-      String model = argv[2];
-      String output = argv[3];
-
-      new TinyRenderer( width, height, model ).render( output );
-    }
-  }
-
-  private static void showHelp()
-  {
-    System.out.println( "Usage: TinyRenderer [width] [height] [model file] [output file]" );
-  }
-
   private TGAImage tgaImage;
   private Model model;
 
-  private TinyRenderer( int width, int height, String model ) throws FileNotFoundException, IOException
+  public TinyRenderer( int width, int height, String model ) throws FileNotFoundException, IOException
   {
     this.tgaImage = new TGAImage( width, height, 0xFF000000 );
 
     this.model = new Model( model );
   }
 
-  private void render( String output ) throws FileNotFoundException, IOException
+  public void render( String output ) throws FileNotFoundException, IOException
   {
-    this.model.render( this.tgaImage.getWidth(), this.tgaImage.getHeight(), this );
+    this.drawModel( this.model );
 
     this.tgaImage.write( output );
   }
 
-  public void line( int x1, int y1, int x2, int y2, int colour )
+  private void drawModel( Model model )
+  {
+    float width = this.tgaImage.getWidth();
+    float height = this.tgaImage.getHeight();
+
+    for ( Face face : model.faces )
+    {
+      for ( int j = 0; j < 3; j ++ )
+      {
+        Vertex v0 = face.vertices[j];
+        Vertex v1 = j + 1 > 2 ? face.vertices[ 0 ] : face.vertices[(j + 1)];
+
+        int x0 = ( int )( ( v0.x + 1.0f ) * width / 2.0f );
+        int y0 = ( int )( ( v0.y + 1.0f ) * height / 2.0f );
+
+        int x1 = ( int )( ( v1.x + 1.0f ) * width / 2.0f );
+        int y1 = ( int )( ( v1.y + 1.0f ) * height / 2.0f );
+
+        this.drawLine( x0, y0, x1, y1, 0xFFFFFFFF );
+      }
+    }
+  }
+
+  public void drawLine( int x1, int y1, int x2, int y2, int colour )
   {
     this.debugPrint( "from {" + x1 + "," + y1 + "}" );
     this.debugPrint( "to   {" + x2 + "," + y2 + "}" );
@@ -77,7 +74,7 @@ public class TinyRenderer
     float x = x1;
     float y = y1;
 
-    while ( !this.finished( x, y, x1, y1, x2, y2 ) )
+    while ( !this.lineFinished( x, y, x1, y1, x2, y2 ) )
     {
       this.tgaImage.set( ( int )x, ( int )y, 0xFFFFFF );
 
@@ -87,8 +84,11 @@ public class TinyRenderer
       y += stepY;
     }
 
-    this.tgaImage.set( x1, y1, 0xFFFF0000 );
-    this.tgaImage.set( x2, y2, 0xFF0000FF );
+    if ( DEBUG )
+    {
+      this.tgaImage.set( x1, y1, 0xFFFF0000 );
+      this.tgaImage.set( x2, y2, 0xFF0000FF );
+    }
   }
 
   private void debugPrint( String line )
@@ -99,7 +99,7 @@ public class TinyRenderer
     }
   }
 
-  private boolean finished( float currentX, float currentY, float startX, float startY, float endX, float endY )
+  private boolean lineFinished( float currentX, float currentY, float startX, float startY, float endX, float endY )
   {
     boolean finishedX, finishedY;
     if ( startX > endX )

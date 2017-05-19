@@ -1,1 +1,1 @@
-java -cp build TinyRenderer $1 $2 $3 $4
+java -cp build Main $1 $2 $3 $4
