@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.*;
 
 public class TinyRenderer
 {
@@ -6,68 +7,97 @@ public class TinyRenderer
 
   public static void main( String [] argv ) throws FileNotFoundException, IOException
   {
-    new TinyRenderer( 100, 100 ).render();
+    new TinyRenderer( 800, 800, "./head.obj" ).render();
   }
 
   private TGAImage tgaImage;
+  private Model model;
 
-  private TinyRenderer( int width, int height )
+  private TinyRenderer( int width, int height, String model ) throws FileNotFoundException, IOException
   {
     this.tgaImage = new TGAImage( width, height, 0xFF000000 );
+    this.model = new Model( model );
   }
 
   private void render() throws FileNotFoundException, IOException
   {
-    this.rect( 20, 20, 20, 10, 0xFFFF0000 );
+    this.model.render( this.tgaImage.getWidth(), this.tgaImage.getHeight(), this );
 
     this.tgaImage.write( "./image.tga" );
   }
 
-  private void rect( int x, int y, int width, int height, int colour )
+  public void line( int x1, int y1, int x2, int y2, int colour )
   {
-    this.line( x,         y,          x + width, y,          colour );
-    this.line( x + width, y,          x + width, y + height, colour );
-    this.line( x + width, y + height, x,         y + height, colour );
-    this.line( x,         y + height, x,         y,          colour );
+    this.debugPrint( "from {" + x1 + "," + y1 + "}" );
+    this.debugPrint( "to   {" + x2 + "," + y2 + "}" );
+
+    float deltaX = x2 - x1;
+    float deltaY = y2 - y1;
+
+    float stepX = deltaX < 0.0f ? -1.0f : 1.0f;
+    float stepY = deltaY < 0.0f ? -1.0f : 1.0f;
+
+    this.debugPrint( "delta {" + deltaX + ", " + deltaY + "}" );
+    if ( Math.abs( deltaX ) > Math.abs( deltaY ) )
+    {
+      stepY = deltaY / deltaX;
+      if ( deltaY > 0.0f ) stepY = Math.abs( stepY );
+      else stepY = -Math.abs( stepY );
+    }
+    else
+    {
+      stepX = deltaX / deltaY;
+      if ( deltaX > 0.0f ) stepX = Math.abs( stepX );
+      else stepX = -Math.abs( stepX );
+    }
+    this.debugPrint( "step {" + stepX + ", " + stepY + "}" );
+
+    float x = x1;
+    float y = y1;
+
+    while ( !this.finished( x, y, x1, y1, x2, y2 ) )
+    {
+      this.tgaImage.set( ( int )x, ( int )y, 0xFFFFFF );
+
+      this.debugPrint( "xy {" + x + "," + y + "}" );
+
+      x += stepX;
+      y += stepY;
+    }
+
+    this.tgaImage.set( x1, y1, 0xFFFF0000 );
+    this.tgaImage.set( x2, y2, 0xFF0000FF );
   }
 
-  private void line( int x1, int y1, int x2, int y2, int colour )
+  private void debugPrint( String line )
   {
-    float startX = x1 < x2 ? x1 : x2;
-    float startY = y1 < y2 ? y1 : y2;
-
-    float endX = x1 < x2 ? x2 : x1;
-    float endY = y1 < y2 ? y2 : y1;
-
-    float xDiff = Math.abs( startX - endX );
-    float yDiff = Math.abs( startY - endY );
-
-    float yStep = xDiff == 0.0f ? 1.0f : yDiff / xDiff;
-    float xStep = yDiff == 0.0f ? 1.0f : xDiff / yDiff;
-
     if ( DEBUG )
     {
-      System.out.println( "-- " + xDiff + ", " + yDiff + " --" );
-      System.out.println( "-- " + xStep + ", " + yStep + " --" );
+      System.out.println( line );
     }
+  }
 
-    yStep = xStep < 1.0f ? 1.0f : yStep;
-    xStep = yStep < 1.0f ? 1.0f : xStep;
-
-    if ( DEBUG )
+  private boolean finished( float currentX, float currentY, float startX, float startY, float endX, float endY )
+  {
+    boolean finishedX, finishedY;
+    if ( startX > endX )
     {
-      System.out.println( "-- " + xStep + ", " + yStep + " --" );
-      System.out.println( "x: " + startX + " -> " + endX );
-      System.out.println( "y: " + startY + " -> " + endY );
+      finishedX = currentX <= endX;
+    }
+    else
+    {
+      finishedX = currentX >= endX;
     }
 
-    for ( float x = startX, y = startY; x <= endX && y <= endY; x += xStep, y += yStep )
+    if ( startY > endY )
     {
-      if ( DEBUG )
-      {
-        System.out.println( x + ", " + y + " = " + ( x <= endX && y <= endY ) );
-      }
-      this.tgaImage.set( (int)x, (int)y, colour );
+      finishedY = currentY <= endY;
     }
+    else
+    {
+      finishedY = currentY >= endY;
+    }
+
+    return finishedX && finishedY;
   }
 }

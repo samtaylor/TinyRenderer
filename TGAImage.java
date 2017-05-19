@@ -15,6 +15,16 @@ public class TGAImage
     this.initialisePixels( backgroundColour );
   }
 
+  public int getWidth()
+  {
+    return this.width;
+  }
+
+  public int getHeight()
+  {
+    return this.height;
+  }
+
   public void set( int x, int y, int colour )
   {
     if ( x < this.width && y < this.height )
