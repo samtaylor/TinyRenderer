@@ -29,6 +29,7 @@ public class TGAImage
   {
     if ( x < this.width && y < this.height )
     {
+      y = this.height - 1 - y;
       this.pixels[ x + ( y * width )] = colour;
     }
   }
