@@ -31,5 +31,5 @@ apply plugin: 'application'
 mainClassName = "MainKt"
 
 run {
-  args System.getProperty("exec.args").split()
+  args "200", "200", "res/head.obj", "output/head.tga"
 }
