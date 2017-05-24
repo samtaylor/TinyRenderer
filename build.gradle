@@ -1,0 +1,35 @@
+apply plugin: 'kotlin'
+
+buildscript {
+
+  ext.kotlin_version = '1.1.2-4'
+
+  repositories {
+    mavenCentral()
+  }
+
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
+}
+
+sourceSets {
+  main.kotlin.srcDirs += "src/main/kotlin"
+  main.java.srcDirs += "src/main/java"
+}
+
+dependencies {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+
+apply plugin: 'application'
+
+mainClassName = "MainKt"
+
+run {
+  args System.getProperty("exec.args").split()
+}

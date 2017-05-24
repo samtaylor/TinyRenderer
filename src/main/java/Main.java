@@ -8,7 +8,7 @@ public class Main
     {
       showHelp();
     }
-    if ( argv.length > 0 && argv[ 0 ].equals( "-help" ) )
+    else if ( argv.length > 0 && argv[ 0 ].equals( "-help" ) )
     {
       showHelp();
     }
@@ -25,6 +25,6 @@ public class Main
 
   private static void showHelp()
   {
-    System.out.println( "Usage: TinyRenderer [width] [height] [model file] [output file]" );
+    System.out.println( "Usage: TinyRendererJava [width] [height] [model file] [output file]" );
   }
 }

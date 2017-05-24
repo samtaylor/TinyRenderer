@@ -21,5 +21,5 @@ fun main( args: Array<String> )
 
 fun showHelp()
 {
-  println( "Usage: TinyRenderer [width] [height] [model file] [output file]" )
+  println( "Usage: TinyRendererKt [width] [height] [model file] [output file]" )
 }
