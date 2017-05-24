@@ -4,7 +4,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   private val width: Int
   private val height: Int
 
-  private val DEBUG = false
+  private val DEBUG = true
 
   init
   {
@@ -18,9 +18,29 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   {
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
-    drawLine( 10, 10, 50, 60, 0xFFFF0000.toInt(), tgaImage )
+    
 
     tgaImage.write( output )
+  }
+
+  public fun drawFace( face: Face, colour: Int, image: TGAImage )
+  {
+    val canvasWidth = image.getWidth()
+    val canvasHeight = image.getHeight()
+
+    for ( i in 0..2 )
+    {
+      val v0 = face.vertices[ i ]
+      val v1 = if ( i + 1 > 2 ) face.vertices[ 0 ] else face.vertices[ i + 1 ]
+
+      val x0 = ( ( v0.x + 1.0F ) * canvasWidth / 2.0F )
+      val y0 = ( ( v0.y + 1.0F ) * canvasHeight / 2.0F )
+
+      val x1 = ( ( v1.x + 1.0F ) * canvasWidth / 2.0F )
+      val y1 = ( ( v1.y + 1.0F ) * canvasHeight / 2.0F )
+
+      drawLine( x0.toInt(), y0.toInt(), x1.toInt(), y1.toInt(), colour, image )
+    }
   }
 
   public fun drawLine( x1: Int, y1: Int, x2: Int, y2: Int, colour: Int, image: TGAImage )
@@ -57,7 +77,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     {
       image.set( x.toInt(), y.toInt(), colour )
 
-      debugPrint( "draw { ${ x.toInt() }, ${ y.toInt() } }" )
+      /*debugPrint( "draw { ${ x.toInt() }, ${ y.toInt() } }" )*/
 
       x += stepX
       y += stepY
