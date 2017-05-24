@@ -4,7 +4,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   private val width: Int
   private val height: Int
 
-  private val DEBUG = true
+  private val DEBUG = false
 
   init
   {
@@ -18,9 +18,17 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   {
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
-    
+    drawModel( model, 0xFF0000FF.toInt(), tgaImage )
 
     tgaImage.write( output )
+  }
+
+  public fun drawModel( model: Model, colour: Int, image: TGAImage )
+  {
+    for ( face in model.faces )
+    {
+      drawFace( face, colour, image )
+    }
   }
 
   public fun drawFace( face: Face, colour: Int, image: TGAImage )
@@ -77,7 +85,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     {
       image.set( x.toInt(), y.toInt(), colour )
 
-      /*debugPrint( "draw { ${ x.toInt() }, ${ y.toInt() } }" )*/
+      debugPrint( "draw { ${ x.toInt() }, ${ y.toInt() } }" )
 
       x += stepX
       y += stepY
