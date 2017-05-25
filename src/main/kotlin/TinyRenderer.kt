@@ -18,7 +18,10 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   {
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
-    drawModel( model, 0xFF0000FF.toInt(), tgaImage )
+    /*drawModel( model, 0xFF0000FF.toInt(), tgaImage )*/
+    fillFace( Face( Vertex( 0.5F, 0.5F, 0.0F ),
+                    Vertex( 0.5F, 1.0F, 0.0F ),
+                    Vertex( 1.0F, 1.0F, 0.0F ) ), 0xFFFF0000.toInt(), tgaImage )
 
     tgaImage.write( output )
   }
@@ -36,7 +39,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     val canvasWidth = image.getWidth()
     val canvasHeight = image.getHeight()
 
-    for ( i in 0..2 )
+    for ( i in 0 .. 2 )
     {
       val v0 = face.vertices[ i ]
       val v1 = if ( i + 1 > 2 ) face.vertices[ 0 ] else face.vertices[ i + 1 ]
@@ -48,6 +51,52 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
       val y1 = ( ( v1.y + 1.0F ) * canvasHeight / 2.0F )
 
       drawLine( x0.toInt(), y0.toInt(), x1.toInt(), y1.toInt(), colour, image )
+    }
+  }
+
+  public fun fillFace( face: Face, colour: Int, image: TGAImage )
+  {
+    val canvasWidth = image.getWidth()
+    val canvasHeight = image.getHeight()
+
+    val faceWidth = face.getWidth( canvasWidth.toInt() )
+    val faceHeight = face.getHeight( canvasHeight.toInt() )
+
+    val tempImage = TGAImage( canvasWidth.toInt(), canvasHeight.toInt(), 0 )
+
+    drawFace( face, colour, tempImage )
+
+    val faceMinX = face.getMinX( canvasWidth.toInt() )
+    val faceMinY = face.getMinY( canvasHeight.toInt() )
+
+    for ( y in faceMinY .. faceMinY + faceHeight - 1 )
+    {
+      var insideTriangle = false
+
+      var lastX = faceMinX
+      var firstX = faceMinX
+
+      for ( x in faceMinX .. faceMinX + faceWidth - 1 )
+      {
+        if ( insideTriangle )
+        {
+          if ( tempImage.get( x, y ) != 0 )
+          {
+            lastX = x
+          }
+        }
+        else
+        {
+          if ( tempImage.get( x, y ) != 0 )
+          {
+            insideTriangle = true
+            lastX = x
+            firstX = x
+          }
+        }
+      }
+
+      drawLine( firstX, y, lastX, y, colour, image )
     }
   }
 
