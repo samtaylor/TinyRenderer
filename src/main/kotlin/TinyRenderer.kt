@@ -19,14 +19,16 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
     /*drawModel( model, 0xFF0000FF.toInt(), tgaImage )*/
-    fillFace( Face( Vertex( 0.5F, 0.5F, 0.0F ),
-                    Vertex( 0.5F, 1.0F, 0.0F ),
-                    Vertex( 1.0F, 1.0F, 0.0F ) ), 0xFFFF0000.toInt(), tgaImage )
+    /*fillFace( Face( Vertex( -0.5F, -0.5F, 0.0F ),
+                    Vertex( 0.5F, -1.0F, 0.0F ),
+                    Vertex( -1.0F, 1.0F, 0.0F ) ), 0xFFFF0000.toInt(), tgaImage )*/
+    fillModel( model, 0xFF0000FF.toInt(), tgaImage )
+    drawModel( model, 0xFFFF0000.toInt(), tgaImage )
 
     tgaImage.write( output )
   }
 
-  public fun drawModel( model: Model, colour: Int, image: TGAImage )
+  private fun drawModel( model: Model, colour: Int, image: TGAImage )
   {
     for ( face in model.faces )
     {
@@ -34,7 +36,15 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     }
   }
 
-  public fun drawFace( face: Face, colour: Int, image: TGAImage )
+  private fun fillModel( model: Model, colour: Int, image: TGAImage )
+  {
+    for ( face in model.faces )
+    {
+      fillFace( face, colour, image )
+    }
+  }
+
+  private fun drawFace( face: Face, colour: Int, image: TGAImage )
   {
     val canvasWidth = image.getWidth()
     val canvasHeight = image.getHeight()
@@ -54,7 +64,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     }
   }
 
-  public fun fillFace( face: Face, colour: Int, image: TGAImage )
+  private fun fillFace( face: Face, colour: Int, image: TGAImage )
   {
     val canvasWidth = image.getWidth()
     val canvasHeight = image.getHeight()
@@ -100,7 +110,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     }
   }
 
-  public fun drawLine( x1: Int, y1: Int, x2: Int, y2: Int, colour: Int, image: TGAImage )
+  private fun drawLine( x1: Int, y1: Int, x2: Int, y2: Int, colour: Int, image: TGAImage )
   {
     debugPrint( "from { $x1, $y1 } to { $x2, $y2 }" )
 
