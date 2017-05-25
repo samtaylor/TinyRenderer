@@ -18,12 +18,8 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   {
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
-    /*drawModel( model, 0xFF0000FF.toInt(), tgaImage )*/
-    /*fillFace( Face( Vertex( -0.5F, -0.5F, 0.0F ),
-                    Vertex( 0.5F, -1.0F, 0.0F ),
-                    Vertex( -1.0F, 1.0F, 0.0F ) ), 0xFFFF0000.toInt(), tgaImage )*/
-    fillModel( model, 0xFF0000FF.toInt(), tgaImage )
-    drawModel( model, 0xFFFF0000.toInt(), tgaImage )
+    fillModel( model, 0xFFFF0000.toInt(), tgaImage )
+    drawModel( model, 0xFFFFFFFF.toInt(), tgaImage )
 
     tgaImage.write( output )
   }
@@ -69,7 +65,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     val canvasWidth = image.getWidth()
     val canvasHeight = image.getHeight()
 
-    val faceWidth = face.getWidth( canvasWidth.toInt() )
+    val faceWidth = face.getWidth( canvasWidth.toInt() ) + 1
     val faceHeight = face.getHeight( canvasHeight.toInt() )
 
     val tempImage = TGAImage( canvasWidth.toInt(), canvasHeight.toInt(), 0 )
@@ -106,7 +102,7 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
         }
       }
 
-      drawLine( firstX, y, lastX, y, colour, image )
+      drawLine( firstX, y, lastX + 1, y, colour, image )
     }
   }
 
@@ -188,5 +184,32 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     {
       println( string )
     }
+  }
+
+  private fun debugTriangles( image: TGAImage )
+  {
+    val f1 = Face( Vertex( -0.75F, 0.75F, 0.0F ),
+                   Vertex( 0.0F, -0.2F, 0.0F ),
+                   Vertex( -0.4F, 0.1F, 0.0F ) )
+    fillFace( f1, 0xFFFF0000.toInt(), image )
+    drawFace( f1, 0xFFFFFFFF.toInt(), image )
+
+    val f2 = Face( Vertex( 0.75F, 0.3F, 0.0F ),
+                   Vertex( 0.4F, 0.2F, 0.0F ),
+                   Vertex( 0.4F, 0.1F, 0.0F ) )
+    fillFace( f2, 0xFF00FF00.toInt(), image )
+    drawFace( f2, 0xFFFFFFFF.toInt(), image )
+
+    val f3 = Face( Vertex( 0.0F, 0.0F, 0.0F ),
+                   Vertex( 0.25F, -0.25F, 0.0F ),
+                   Vertex( 0.0F, -0.5F, 0.0F ) )
+    fillFace( f3, 0xFF0000FF.toInt(), image )
+    drawFace( f3, 0xFFFFFFFF.toInt(), image )
+
+    val f4 = Face( Vertex( 0.4F, 0.0F, 0.0F ),
+                   Vertex( -0.65F, -0.25F, 0.0F ),
+                   Vertex( 0.4F, -0.5F, 0.0F ) )
+    fillFace( f4, 0xFFFFFF00.toInt(), image )
+    drawFace( f4, 0xFFFFFFFF.toInt(), image )
   }
 }
