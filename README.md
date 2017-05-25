@@ -4,4 +4,4 @@ My implementation of the TinyRenderer exercise provided by Dmitry Sokolov ([http
 # Progress
 Current output of the renderer:
 
-![Image](output/head.tga)
+![Image](./output/head.tga?raw=true)
