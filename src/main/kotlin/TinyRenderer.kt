@@ -1,3 +1,5 @@
+import java.util.Random
+
 public class TinyRenderer constructor( width: Int, height: Int, model: String )
 {
   private val model: Model
@@ -18,8 +20,10 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
   {
     val tgaImage = TGAImage( this.width, this.height, 0xFF000000.toInt() )
 
+    /*debugTriangles( tgaImage )*/
+
     fillModel( model, 0xFFFF0000.toInt(), tgaImage )
-    drawModel( model, 0xFFFFFFFF.toInt(), tgaImage )
+    /*drawModel( model, 0xFFFFFFFF.toInt(), tgaImage )*/
 
     tgaImage.write( output )
   }
@@ -40,10 +44,12 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     }
   }
 
-  private fun drawFace( face: Face, colour: Int, image: TGAImage )
+  private fun drawFace( face: Face, colour: Int, image: TGAImage ): Vector3?
   {
     val canvasWidth = image.getWidth()
     val canvasHeight = image.getHeight()
+
+    var worldCoords = arrayOfNulls<Vector3>( 3 )
 
     for ( i in 0 .. 2 )
     {
@@ -56,8 +62,14 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
       val x1 = ( ( v1.x + 1.0F ) * canvasWidth / 2.0F )
       val y1 = ( ( v1.y + 1.0F ) * canvasHeight / 2.0F )
 
+      worldCoords[ i ] = Vector3( v0.x, v0.y, v0.z )
+
       drawLine( x0.toInt(), y0.toInt(), x1.toInt(), y1.toInt(), colour, image )
     }
+
+    val normal = ( worldCoords[ 2 ]!!.sub( worldCoords[ 0 ] ) ).crs( worldCoords[ 1 ]!!.sub( worldCoords[ 0 ] ) )
+
+    return normal.nor()
   }
 
   private fun fillFace( face: Face, colour: Int, image: TGAImage )
@@ -70,39 +82,50 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
 
     val tempImage = TGAImage( canvasWidth.toInt(), canvasHeight.toInt(), 0 )
 
-    drawFace( face, colour, tempImage )
+    val normal = drawFace( face, colour, tempImage )
 
-    val faceMinX = face.getMinX( canvasWidth.toInt() )
-    val faceMinY = face.getMinY( canvasHeight.toInt() )
+    val lightDir = Vector3( 0.0F, 0.0F, -1.0F )
+    val intensity = normal?.scl( lightDir )
+    val colourCompontent = intensity!!.z * 255.0F
 
-    for ( y in faceMinY .. faceMinY + faceHeight - 1 )
+    if ( colourCompontent > 0.0F )
     {
-      var insideTriangle = false
+      val shadeColour = getIntFromColor( colourCompontent.toInt(),
+                                         colourCompontent.toInt(),
+                                         colourCompontent.toInt() )
 
-      var lastX = faceMinX
-      var firstX = faceMinX
+      val faceMinX = face.getMinX( canvasWidth.toInt() )
+      val faceMinY = face.getMinY( canvasHeight.toInt() )
 
-      for ( x in faceMinX .. faceMinX + faceWidth - 1 )
+      for ( y in faceMinY .. faceMinY + faceHeight - 1 )
       {
-        if ( insideTriangle )
-        {
-          if ( tempImage.get( x, y ) != 0 )
-          {
-            lastX = x
-          }
-        }
-        else
-        {
-          if ( tempImage.get( x, y ) != 0 )
-          {
-            insideTriangle = true
-            lastX = x
-            firstX = x
-          }
-        }
-      }
+        var insideTriangle = false
 
-      drawLine( firstX, y, lastX + 1, y, colour, image )
+        var lastX = faceMinX
+        var firstX = faceMinX
+
+        for ( x in faceMinX .. faceMinX + faceWidth - 1 )
+        {
+          if ( insideTriangle )
+          {
+            if ( tempImage.get( x, y ) != 0 )
+            {
+              lastX = x
+            }
+          }
+          else
+          {
+            if ( tempImage.get( x, y ) != 0 )
+            {
+              insideTriangle = true
+              lastX = x
+              firstX = x
+            }
+          }
+        }
+
+        drawLine( firstX, y, lastX + 1, y, shadeColour, image )
+      }
     }
   }
 
@@ -194,22 +217,31 @@ public class TinyRenderer constructor( width: Int, height: Int, model: String )
     fillFace( f1, 0xFFFF0000.toInt(), image )
     drawFace( f1, 0xFFFFFFFF.toInt(), image )
 
-    val f2 = Face( Vertex( 0.75F, 0.3F, 0.0F ),
+    /*val f2 = Face( Vertex( 0.75F, 0.3F, 0.0F ),
                    Vertex( 0.4F, 0.2F, 0.0F ),
                    Vertex( 0.4F, 0.1F, 0.0F ) )
     fillFace( f2, 0xFF00FF00.toInt(), image )
-    drawFace( f2, 0xFFFFFFFF.toInt(), image )
+    drawFace( f2, 0xFFFFFFFF.toInt(), image )*/
 
-    val f3 = Face( Vertex( 0.0F, 0.0F, 0.0F ),
+    /*val f3 = Face( Vertex( 0.0F, 0.0F, 0.0F ),
                    Vertex( 0.25F, -0.25F, 0.0F ),
                    Vertex( 0.0F, -0.5F, 0.0F ) )
     fillFace( f3, 0xFF0000FF.toInt(), image )
-    drawFace( f3, 0xFFFFFFFF.toInt(), image )
+    drawFace( f3, 0xFFFFFFFF.toInt(), image )*/
 
     val f4 = Face( Vertex( 0.4F, 0.0F, 0.0F ),
-                   Vertex( -0.65F, -0.25F, 0.0F ),
+                   Vertex( 0.3F, -0.25F, 0.1F ),
                    Vertex( 0.4F, -0.5F, 0.0F ) )
     fillFace( f4, 0xFFFFFF00.toInt(), image )
     drawFace( f4, 0xFFFFFFFF.toInt(), image )
   }
+
+  public fun getIntFromColor( red: Int, green: Int, blue: Int ): Int
+  {
+    val redHex = ( red.toInt() shl 16 ) and 0x00FF0000.toInt();
+    val greenHex = ( green shl 8 ) and 0x0000FF00;
+    val blueHex = blue and 0x000000FF;
+
+    return 0xFF000000.toInt() or redHex.toInt() or greenHex.toInt() or blueHex.toInt();
+}
 }

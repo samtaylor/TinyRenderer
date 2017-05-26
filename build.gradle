@@ -31,5 +31,5 @@ apply plugin: 'application'
 mainClassName = "MainKt"
 
 run {
-  args "500", "500", "res/head.obj", "output/head.tga"
+  args "1000", "1000", "res/head.obj", "output/head.tga"
 }
